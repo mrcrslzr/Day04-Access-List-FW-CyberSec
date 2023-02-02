@@ -1,0 +1,303 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Task1: basic CISCO Security
+Standard Access-List: Block IP address ONLY.
+
+
+@EDGE
+Policy:
+conf t
+no access-list 1
+access-list 1 permit 10.12.0.0 0.0.255.255
+access-list 1 permit 10.22.0.0 0.0.255.255
+access-list 1 permit 10.32.0.0 0.0.255.255
+access-list 1 permit 10.42.0.0 0.0.255.255
+access-list 1 permit 10.52.0.0 0.0.255.255
+
+Pag apply ng Access List
+int gi 0/0/1 
+ip access-group 1 in
+do sh access-list 1
+
+int gi 0/0/1
+no ip access-group 1 in
+end
+
+@EDGE
+conf t
+no access-list 2
+access-list 2 permit 10.12.0.0 0.0.255.255
+access-list 2 permit 10.22.0.0 0.0.255.255
+access-list 2 permit 10.32.0.0 0.0.255.255
+access-list 2 permit 10.42.0.0 0.0.255.255
+access-list 2 permit 10.52.0.0 0.0.255.255
+int gi 0/0/1
+ip access-group 2 in
+do sh access-list 2
+
+DAY4: Network Security
+@cmd
+nmap -sP 10.31.1.0/24
+nmap -v 10.22.1.10
+
+How to Attack 135/445 of your victim
+
+ @cmd
+ net use \\10.k.1.10\ipc$ /user:administrator
+
+ TASK2: CONFIGURING BASIC CISCO FIREWALL
+ STEP1: MAKE cucm VERY HACKABLE
+
+@cucm
+conf t
+Service tcp-small-servers
+service udp-small-servers
+service finger
+ip dns server
+ip http server
+ip http server
+ip http secure-server
+Int Fa 0/0
+ ip add 10.32.100.9 255.255.255.0 Secondary
+  end
+
+  nmap -v 10.32.100.8
+  nmap -v 10.32.100.9
+
+
+C:\Windows\System32\drivers\etc\hosts
+
+
+TASK3: HOW to secure your company using FIREWALL
+@cucm
+ip host cm 10.32.100.8
+ip host cm2 10.32.100.9
+ip host pc 10.32.1.4
+ip host sw 10.32.100.4
+ip host p1 10.32.100.101
+ip host p2 10.32.100.102
+
+CyberSecurity:
+UTM = Unified Threat Management
+FIREWALL
+VPNsite2site
+er: LogRythim/Splunk
+AntiVirus
+IntrusionDetectionSyste/Prevention: ips/ids: SNORT
+NAC:network Admission Control
+ DakilangSumbungero:
+ SEIM = Security Event Info Manager
+ PALO ALTO CyberSecurity
+ CheckPointt CyberSecurity
+ Cisco ASA/Firepower
+ FortinetFortigate
+ Sophos
+
+FIREWALL Level:
+1. Godmode: A.I. ApplicationNextGen firewall
+2. GreatFW: NextGeneration Firewall, statefull
+3. PWedena: Packetfilter firewall = 'Cisco exte
+
+TASK5: Make a firewall policy to meet these conditions:
+cm is a company website, protect it 
+ 80, 443, 2000 <- OPEN
+cm2 is DNS, and ssh server, protect it
+
+EXTENDED FIREWALL: Extended Name Access List
+@cucm:
+formula = PROTOCOL:tcp,udp,IP,icmp   HACKER  VICTIM PORT)
+conf t
+no IP access-list extended FP1
+IP access-list extended FP1
+ permit tcp Any host cm EQ 80 log
+ permit tcp Any host cm EQ 443 log
+ permit tcp Any host cm EQ 2000 log
+ permit tcp Any host cm2 EQ 53 log
+ permit tcp Any host cm2 EQ 22 log
+ Int Fa 0/0
+  ip access-group FP1 in
+  do sh access-list FP1
+
+@cmd
+Kapag may firewall na:
+nmap -Pnv cm
+
+Ex2: Make a firewall policy to these: FP2
+cm is a http(80), ssh(22), dns(53) server ONLY
+cm2 is https(443),telnet (23), ssh(22) server
+
+conf t
+no IP access-list extended FP2
+IP access-list extended FP2
+ permit tcp Any host cm EQ 80 log
+ permit tcp Any host cm EQ 22 log
+ permit tcp Any host cm EQ 53 log
+ permit tcp Any host cm2 EQ 443 log
+ permit tcp Any host cm2 EQ 23 log
+ permit tcp Any host cm2 EQ 22 log
+ Int Fa 0/0
+  ip access-group FP2 in
+  do sh access-list FP2
+
+Remove Firewall:
+Int Fa 0/0
+  no ip access-group FP2 in
+  do sh access-list FP2
+
+Ex3: Create firewall policy FP3 to allow:
+cm finger(79),daytime(13),sccp(2000),sip(5060)
+cm2 ssh, telnet,dns,ping(icmp,noEQ)
+
+conf t
+no IP access-list extended FP3
+IP access-list extended FP3
+ permit tcp Any host cm EQ finger log
+ permit tcp Any host cm EQ daytime log
+ permit tcp Any host cm EQ 2000 log
+ permit tcp Any host cm EQ 5060 log
+ permit tcp Any host cm2 EQ 22 log
+ permit tcp Any host cm2 EQ 23 log
+ permit tcp Any host cm2 EQ 53 log
+ permit icmp Any host cm2
+ Int Fa 0/0
+  ip access-group FP3 in
+  do sh access-list FP3
+
+Ex4: Create NOLAMON Policy
+cm allow ping, sip(5060), we(80), secureweb(443)
+cm2 allow ssh(22), telnet(23), dns(53), sccp(2000), finger
+
+conf t
+no IP access-list extended NOLAMON
+IP access-list extended NOLAMON
+ permit icmp Any host cm
+ permit tcp Any host cm EQ 5060 log
+ permit tcp Any host cm EQ 80 log
+ permit tcp Any host cm EQ 443 log
+ permit tcp Any host cm2 EQ 22 log
+ permit tcp Any host cm2 EQ 23 log
+ permit tcp Any host cm2 EQ 53 log
+ permit tcp Any host cm2 EQ 2000 log
+ permit tcp Any host cm2 EQ 79 log
+ Int Fa 0/0
+  ip access-group NOLAMON in
+  do sh access-list NOLAMON
+
+Ex5: Make policy BREAKTIME
+CM open All EvenNumberports
+cm2 open ping, OddNumberPorts
+
+conf t
+ no IP access-list extended BREAKTIME
+ IP access-list extended BREAKTIME
+ permit tcp Any host cm EQ 22 log
+ permit tcp Any host cm EQ 80 log
+ permit tcp Any host cm EQ 1720 log
+ permit tcp Any host cm EQ 2000 log
+ permit tcp Any host cm EQ 2002 log
+ permit tcp Any host cm EQ 4002 log
+ permit tcp Any host cm EQ 5060 log
+ permit tcp Any host cm EQ 6002 log
+ permit tcp Any host cm EQ 9002 log
+ permit icmp Any host cm2
+ permit tcp Any host cm2 EQ 7 log
+ permit tcp Any host cm2 EQ 9 log
+ permit tcp Any host cm2 EQ 13 log
+ permit tcp Any host cm2 EQ 19 log
+ permit tcp Any host cm2 EQ 23 log
+ permit tcp Any host cm2 EQ 53 log
+ permit tcp Any host cm2 EQ 79 log
+ permit tcp Any host cm2 EQ 443 log
+ permit tcp Any host cm2 EQ 5061 log
+ Int Fa 0/0
+  ip access-group BREAKTIME in
+  do sh access-list BREAKTIME
+
+
+TASK6: 4th and final lab in ccna exam
+Network Address Translation (NAT) ---> tago, hide real IP using SUBNET MASK
+M.S=Proxy; Apple=Hotspot, Android=tethering
+
+@EDGE (m=32) (132=100+m)
+sh run int gi 0/0/1
+
+conf t
+access-list 8 permit 10.32.0.0 0.0.255.255
+int gi 0/0/0
+ ip nat Inside
+Int gi 0/0/1
+ ip nat Outside
+ ip nat inside source list 8 int Gi 0/0/1 Overload
+ !ip nat inside source static <true PC IP> <GW IP>
+ ip nat inside source static 10.32.1.10 200.0.0.132
+ !ip nat inside source static tcp 10.32.1.10 80 200.0.0.132 8080
+do sh ip nat translation
+
+Kill@:
+PC: stop ping ^C
+clear ip nat translation
+
+conf t
+int gi 0/0/0
+ No ip nat inside
+Int gi 0/0/1
+ no ip nat Outside
+PC: ping 10.k.1.10 -t
+
+
+
+TASK7: 15% Exam. Entering the World of Devops
+Network Engineer            Devops:
+console                     postman+APItesting
+telnet                      Python + JSON
+ssh                         ansible + Yaml
+VMWare                      Docker
+2xlinux:8gb,2cpu            linux:x200mb x 500
+
+
+===============================================
+
+TASK6: Fundamentals of Cisco Network Security:
+
+Security Concepts and Terminologies
+Assets:
+ Hardwares
+ People (Customer Information)
+ Data
+ Properties (Physical Assets)
+ Plans/Projects
+
+Vulnerabilities - weakness points; can compromise damage
+ Virus
+ Malware
+
+Exploit
+ Tool use to apply damage/to attack vulnerability
+  Metasploit - will cause harm to the system
+  Macflooding
+
+Threat
+ Hacker
+ With Malicious Intent
+ Use of Exploit
+
+
+
+
